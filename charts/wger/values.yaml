@@ -52,7 +52,7 @@ service:
 # PostgreSQL Settings. Only the bare minimum has been specified below.
 # For more options, see https://github.com/bitnami/charts/tree/master/bitnami/postgresql
 postgresql:
-  # Note: keep these variables present as the chart uses them for the StatefulSet
+  # Note: keep these variables present as the chart uses them for the Deployment
   global:
     postgresql:
       auth:
@@ -73,7 +73,7 @@ postgresql:
 # Redis Settings. Only the bare minimum has been specified below.
 # For more options, see https://github.com/bitnami/charts/tree/master/bitnami/redis
 redis:
-  # Note: keep these variables present as the chart uses them for the StatefulSet
+  # Note: keep these variables present as the chart uses them for the Deployment
   auth:
     password: wger
     enabled: false
