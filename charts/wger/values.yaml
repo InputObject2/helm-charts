@@ -5,16 +5,12 @@ app:
     image: wger/server:latest
     imagePullPolicy: Always
     annotations: {}
-  ingress:
-    enabled: false
-    url: fit.example.com
-    tls: true
-    annotations: {}
+    replicas: 1
   persistence:
     enabled: false
-    storageClass: ""
+    storageClass: null
     accessModes:
-      - ReadWriteOnce
+      - ReadWriteMany
     size: 8Gi
     annotations: {}
   resources:
@@ -29,6 +25,29 @@ app:
       value: UTC
     - name: ENABLE_EMAIL
       value: "False"
+    - name: EMAIL_BACKEND
+      value: "django.core.mail.backends.console.EmailBackend"
+    - name: EMAIL_HOST
+      value: None
+    - name: EMAIL_PORT
+      value: 587
+    - name: EMAIL_HOST_USER
+      value: None
+    - name: EMAIL_HOST_PASSWORD
+      value: None
+    - name: FROM_EMAIL
+      value: test@test.com
+
+ingress:
+  enabled: false
+  url: fit.example.com
+  tls: true
+  annotations: {}
+    
+service:
+  annotations: {}
+  type: ClusterIP
+  port: 8000
 
 # PostgreSQL Settings. Only the bare minimum has been specified below.
 # For more options, see https://github.com/bitnami/charts/tree/master/bitnami/postgresql
@@ -36,24 +55,20 @@ postgresql:
   # Note: keep these variables present as the chart uses them for the StatefulSet
   global:
     postgresql:
-      postgresqlDatabase: wger
-      postgresqlUsername: wger
-      postgresqlPassword: wger
-      servicePort: 5432
-  resources:
-    requests:
-      memory: 128Mi
-      cpu: 100m
-    limits:
-      memory: 512Mi
-      cpu: 300m
-  persistence:
-    enabled: false
-    mountPath: /bitnami/postgresql
-    storageClass: ""
-    accessModes:
-      - ReadWriteOnce
-    size: 8Gi
+      auth:
+        database: wger
+        username: wger
+        password: wger
+      service:
+        ports:
+          postgresql: 5432
+    persistence:
+      enabled: true
+      mountPath: /bitnami/postgresql
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 8Gi
 
 # Redis Settings. Only the bare minimum has been specified below.
 # For more options, see https://github.com/bitnami/charts/tree/master/bitnami/redis

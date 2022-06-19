@@ -60,15 +60,24 @@ For additional configuration of the Bitnami PostgreSQL and Redis, please check t
 | `app.global.image` | Image to use for the wger deployment | String | `wger/server:latest` |
 | `app.global.imagePullPolicy` | [Pull policy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) to use for the image | String | `Always` |
 | `app.global.annotations` | Annotations to attach to each resource, apart from the ingress and the persistence objects | Dictionary | `{}` |
+| `app.global.replicas` | Number of webserver instances that should be running. | Integer | `1` |
 
 ### Ingress
 
 | Name | Description | Type | Default Value |
 |------|-------------|------|---------------|
-| `app.ingress.enabled` | Whether to enable ingress. If `false`, the options from below are ignored | Boolean | `false` |
-| `app.ingress.url` | The URL that this ingress should use | String | `fit.example.com` |
-| `app.ingress.tls` | Whether to enable TLS. If using cert-manager, the correct annotations have to be set | Boolean | `true` |
-| `app.ingress.annotations` | Annotations to attach to the ingress | Dictionary | `{}` |
+| `ingress.enabled` | Whether to enable ingress. If `false`, the options from below are ignored | Boolean | `false` |
+| `ingress.url` | The URL that this ingress should use | String | `fit.example.com` |
+| `ingress.tls` | Whether to enable TLS. If using cert-manager, the correct annotations have to be set | Boolean | `true` |
+| `ingress.annotations` | Annotations to attach to the ingress | Dictionary | `{}` |
+
+### Service
+
+| Name | Description | Type | Default Value |
+|------|-------------|------|---------------|
+| `service.type` | Sets the http service type, valid values are `NodePort`, `ClusterIP` or `LoadBalancer`. | String | `ClusterIP` |
+| `service.port` | Port for the service | Integer | `8000` |
+| `service.annotations` | Annotations to attach to the service | Dictionary | `{}` |
 
 ### Persistence
 
@@ -76,7 +85,7 @@ For additional configuration of the Bitnami PostgreSQL and Redis, please check t
 |------|-------------|------|---------------|
 | `app.persistence.enabled` | Whether to enable persistent storage. If `false`, the options from below are ignored | Boolean | `false` |
 | `app.persistence.storageClass` | StorageClass for the PVCs | String | `""` |
-| `app.persistence.accessModes` | Access modes for the PVCs | Array | `["ReadWriteOnce"]` |
+| `app.persistence.accessModes` | Access modes for the PVCs | Array | `["ReadWriteMany"]` |
 | `app.persistence.size` | PVC size | String | `8Gi` |
 | `app.persistence.annotations` | Annotations to attach to the persistence objects (PVC and PV) | Dictionary | `{}` |
 
@@ -99,24 +108,7 @@ If you are interested in the environment variables that use values from the helm
 
 ### PostgreSQL and Redis settings
 
-The application reuses the following settings directly from the Bitnami Helm charts, so you don't have to declare them twice:
-
-#### PostgreSQL
-
-| Name | Description | Type | Default Value |
-|------|-------------|------|---------------|
-| `postgresql.global.postgresql.postgresqlDatabase` | PostgreSQL database name to use for wger | String | `wger` |
-| `postgresql.global.postgresql.postgresqlUsername` | PostgreSQL username to use for wger | String | `wger` |
-| `postgresql.global.postgresql.postgresqlPassword` | PostgreSQL password to use for wger | String | `wger` |
-| `postgresql.global.postgresql.servicePort` | Port for the PostgreSQL deployment | Integer | `5432` |
-
-#### Redis
-
-| Name | Description | Type | Default Value |
-|------|-------------|------|---------------|
-| `redis.auth.enabled` | Whether to enable redis login. Currently, only `false` is supported | Boolean | `false` |
-| `redis.auth.password` | Password for redis login. Not required if `redis.auth.enabled` is `false` | String | `wger` |
-| `redis.master.containerPort` | Port for the Redis deployment | Integer | `6379` |
+The application reuses the following settings directly from the Bitnami Helm charts. For more options, see [the Postgresql chart](https://github.com/bitnami/charts/tree/master/bitnami/postgresql) and the [the Redis chart](https://github.com/bitnami/charts/tree/master/bitnami/redis).
 
 ## Upgrading
 
@@ -142,6 +134,12 @@ Generally:
 * if you have a problem, create an issue in [the issue tracker](https://github.com/wger-project/helm-charts/issues)
 * if you have a cool idea, create a fork and send pull requests
 * assure that your code is well-formed (hint: [`helm lint`](https://helm.sh/docs/helm/helm_lint/) is a useful command). This is enforced using continuous integration.
+
+## Running a highly available setup
+
+The deployment can be scaled using `app.global.replicas` to allow for more web server replicas. Persistence should be enabled as well to ensure that the different webservers have access to the same static and media shares. 
+
+In a production deployment, it is assumed that these files will be handled by a CDN/SE in front of your application so persistence remains optional. Postgres persistence should be enabled as well for all scenarios except local dev.
 
 ## Developing locally
 
